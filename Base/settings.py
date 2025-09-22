@@ -7,20 +7,20 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # load varialbles
-#load_dotenv()
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # LIVE PASSWORD
-DB_PASSWORD_IT = os.environ['DB_PASSWORD_IT']
+#DB_PASSWORD_IT = os.environ['DB_PASSWORD_IT']
 
 # LOCAL PASSWORD
-#DB_PASSWORD_IT = os.environ.get('DB_PASSWORD_IT')
+DB_PASSWORD_IT = os.environ.get('DB_PASSWORD_IT')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
-#SECRET_KEY = os.environ.get('SECRET_KEY')
+#SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -28,8 +28,8 @@ DEBUG = True
 
 
 #ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['https://ratshie.com','ratshie.com','localhost:8000','ratshie-production.up.railway.app','https://ratshie-production.up.railway.app']
-CSRF_TRUSTED_ORIGINS = ['https://ratshie.com','https://ratshie-production.up.railway.app']
+ALLOWED_HOSTS = ['https://ratshie.com','ratshie.com','localhost:8000','ratshie-production.up.railway.app','https://ratshie-production.up.railway.app','https://eb277bcd56d4.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://ratshie.com','https://ratshie-production.up.railway.app','https://eb277bcd56d4.ngrok-free.app']
 
 
 # Application definition

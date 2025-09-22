@@ -59,6 +59,7 @@ def billing_info(request):
         request.session['my_shipping'] = my_shipping
         # Get host
         host = request.get_host()
+        
         # paypal form
         paypal_dict={
             'business': settings.PAYPAL_RECEIVER_EMAIL,
@@ -76,6 +77,7 @@ def billing_info(request):
         }
         #paypal button
         paypal_form = PayPalPaymentsForm(initial=paypal_dict)
+        
         if request.user.is_authenticated:
             # get billing form
             billing_form = PaymentForm()
