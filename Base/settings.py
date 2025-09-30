@@ -1,6 +1,5 @@
-from pathlib import Path
 import os
-
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -13,14 +12,14 @@ load_dotenv()
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # LIVE PASSWORD
-#DB_PASSWORD_IT = os.environ['DB_PASSWORD_IT']
+DB_PASSWORD_IT = os.environ['DB_PASSWORD_IT']
 
 # LOCAL PASSWORD
-DB_PASSWORD_IT = os.environ.get('DB_PASSWORD_IT')
+#DB_PASSWORD_ISL = os.environ.get('DB_PASSWORD_IT')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = os.environ['SECRET_KEY']
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ['SECRET_KEY']
+#SECRET_KEYS = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -28,8 +27,8 @@ DEBUG = True
 
 
 #ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['https://ratshie.com','ratshie.com','localhost:8000','ratshie-production.up.railway.app','https://ratshie-production.up.railway.app','eb277bcd56d4.ngrok-free.app']
-CSRF_TRUSTED_ORIGINS = ['https://ratshie.com','https://ratshie-production.up.railway.app','https://eb277bcd56d4.ngrok-free.app']
+ALLOWED_HOSTS = ['https://ratshie.com','ratshie.com','localhost:8000','ratshie-production.up.railway.app','https://ratshie-production.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://ratshie.com','http://localhost:8000','https://ratshie-production.up.railway.app']
 
 
 # Application definition
@@ -41,9 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Shop',
-    'Cart',
-    'Payment',
+    'Shop.apps.ShopConfig',
+    'Cart.apps.CartConfig',
+    'Payment.apps.PaymentConfig',
     'whitenoise.runserver_nostatic',
     'paypal.standard.ipn',
 ]
@@ -151,7 +150,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#paypal
-#set sanbox
-PAYPAL_TEST = True
-PAYPAL_RECEIVER_EMAIL = 'business@ratshie.com'
+# PayPal (django-paypal)
+PAYPAL_TEST = os.environ.get('PAYPAL_TEST') # default True for sandbox
+PAYPAL_RECEIVER_EMAIL = os.environ.get('PAYPAL_RECEIVER_EMAIL')  # correct spelling

@@ -1,23 +1,23 @@
-
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
 from Payment.forms import ShippingForm, PaymentForm
-from .models import ShippingAddress, Order,OrderItem
-from Shop.models import Product, Profile
+from .models import ShippingAddress, Order, OrderItem
+from Shop.models import Profile
 from Cart.cart import Cart
 import datetime
 #paypal
 from django.urls import reverse
 from paypal.standard.forms import PayPalPaymentsForm
 from django.conf import settings
-import uuid #unique id for duplicate orders 
+import uuid  # unique id for duplicate orders
 
 
-# Create your views here.
 def payment_success(request):
-    return render(request, 'payment/payment_success.html', {})
+    return render(request, 'payments/payment_success.html', {})
+
+
 def payment_failed(request):
-    return render(request, 'payment/payment_failed.html', {})
+    return render(request, 'payments/payment_failed.html', {})
 
 
 def checkout(request):
@@ -27,9 +27,9 @@ def checkout(request):
     quantities = cart.get_quants
     totals = cart.cart_total()
 
-
     if request.user.is_authenticated:
         shipping_user = ShippingAddress.objects.get(user__id=request.user.id)
+        #shipping_user = ShippingAddress.objects.filter(user__id=request.user.id).first()
         shipping_form = ShippingForm(request.POST or None, instance=shipping_user)
         return render(request, 'payments/checkout.html', {
             'cart_products': cart_products,
@@ -38,71 +38,70 @@ def checkout(request):
             'shipping_form': shipping_form})
     else:
         shipping_form = ShippingForm(request.POST or None)
-        return render(request, 'payments/checkout.html', {
-            'cart_products': cart_products,
-            'quantities': quantities,
-            'totals': totals,
-            'shipping_form': shipping_form})
-	
-        
+
+    return render(request, 'payments/checkout.html', {
+        'cart_products': cart_products,
+        'quantities': quantities,
+        'totals': totals,
+        'shipping_form': shipping_form
+    })
+
+
 
 def billing_info(request):
     if request.POST:
         cart = Cart(request)
-        cart_products = cart.get_prods
-        quantities = cart.get_quants
+        cart_products = cart.get_prods()       # call the methods
+        quantities = cart.get_quants()
         totals = cart.cart_total()
-        
 
-        # Create a session with shipping info
-        my_shipping = request.POST
+        # Create a session with shipping info (normalize to plain dict)
+        my_shipping = {k: v for k, v in request.POST.items()}
         request.session['my_shipping'] = my_shipping
         # Get host
-        host = request.get_host()
-        
-        # paypal form
-        paypal_dict={
+        host = request.POST
+        # Paypal
+        paypal_dict = {
             'business': settings.PAYPAL_RECEIVER_EMAIL,
             'amount': totals,
-            'item_name': 'Parts Order',
+            'item_name': 'Order',
             'no_shipping': '2',
-            'invoice': str(uuid.uuid4()),
-            'currency_code': 'ZAR',
-            'notify_url': 'https://{}{}'.format(host, reverse("paypal-ipn")),
-            'return_url': 'https://{}{}'.format(host, reverse("payment_success")),
-            'cancel_url': 'https://{}{}'.format(host, reverse("payment_failed")),
-            
+            'invoice':str(uuid.uuid4()),
+            'currency': 'ZAR',
+            'notify_url': 'https://{}{}'.format(host,reverse('paypal-ipn')),
+            'return_url': 'https://{}{}'.format(host,reverse('payment_success')),
+            'cancel_url': 'https://{}{}'.format(host,reverse('payment_failed')),
         }
-        #paypal button
+        # Button
         paypal_form = PayPalPaymentsForm(initial=paypal_dict)
+        # Authenticated vs guest: both render the same template/context
         
         if request.user.is_authenticated:
-            # get billing form
             billing_form = PaymentForm()
             return render(request, 'payments/billing_info.html', {
-                'paypal_form': paypal_form,
                 'cart_products': cart_products,
                 'quantities': quantities,
                 'totals': totals,
-                'shipping_info': request.POST, 'billing_form': billing_form})
-        elif not request.user.is_authenticated:
+                'shipping_form': request.POST,    # keep for template backward-compat
+                'shipping_info': my_shipping,     # normalized dict you can use safely
+                'billing_form': billing_form,
+                'paypal_form': paypal_form,
+            })
+        else:
             billing_form = PaymentForm()
             return render(request, 'payments/billing_info.html', {
-                'paypal_form': paypal_form,
                 'cart_products': cart_products,
                 'quantities': quantities,
                 'totals': totals,
-                'shipping_info': request.POST, 'billing_form': billing_form})
-
-        shipping_form = request.POST
-        return render(request, 'payments/billing_info.html', {
-            'cart_products': cart_products,
-            'quantities': quantities,
-            'totals': totals,
-            'shipping_form': shipping_form})
+                'shipping_form': request.POST,
+                'shipping_info': my_shipping,
+                'billing_form': billing_form,
+                'paypal_form': paypal_form,
+            })
     else:
-        messages.warning(request, 'Access Denied')
+        messages.success(request, 'Access Denied')
         return redirect('home')
+
 
 def process_order(request):
     if request.POST:
@@ -117,14 +116,14 @@ def process_order(request):
         # Get shipping session data
         my_shipping = request.session.get('my_shipping')
         
-        # Gather  oder info
+        # Gather order info
         full_name = my_shipping['shipping_full_name']
         email = my_shipping['shipping_email']
         # Create Address from session info
         shipping_address = f"{my_shipping['shipping_address1']}\n{my_shipping['shipping_address2']}\n{my_shipping['shipping_city']}\n{my_shipping['shipping_state']}\n{my_shipping['shipping_zipcode']}\n{my_shipping['shipping_country']}"
         amount_paid = totals
 
-        #create an oder
+        # Create an order
         if request.user.is_authenticated:
             user = request.user
             create_order = Order(user=user, full_name=full_name, email=email, shipping_address=shipping_address, amount_paid=amount_paid)
@@ -161,7 +160,10 @@ def process_order(request):
             messages.warning(request, 'oder placed')
             return redirect('home')
         else:
-            create_order = Order(full_name=full_name, email=email, shipping_address=shipping_address, amount_paid=amount_paid)
+            create_order = Order(full_name=full_name,
+                                 email=email,
+                                 shipping_address=shipping_address,
+                                 amount_paid=amount_paid)
             create_order.save()
 
              # add items
@@ -196,11 +198,11 @@ def process_order(request):
         messages.warning(request, 'Access Denied')
         return redirect('home')
 
+
 def shipped_dash(request):
     if request.user.is_authenticated and request.user.is_superuser:
         orders = Order.objects.filter(shipped=True)
         if request.POST:
-            status = request.POST['shipping_status']
             num = request.POST['num']
             # get the order
             order = Order.objects.filter(id=num)
@@ -211,12 +213,12 @@ def shipped_dash(request):
             # redirect
             #messages.success(request, "Shipping Status Updated")
             return redirect('shipped_dash')
-        
+
         return render(request, 'payments/shipped_dash.html', {'orders': orders})
     else:
         messages.success(request, "Access Denied")
-        return redirect(request, 'home')
-    
+        return redirect('home')
+
 
 def not_shipped(request):
     if request.user.is_authenticated and request.user.is_superuser:
@@ -236,9 +238,10 @@ def not_shipped(request):
         return render(request, 'payments/not_shipped.html', {'orders': orders})
     else:
         messages.success(request, "Access Denied")
-        return redirect(request, 'home')
-    
-def orders(request,pk):
+        return redirect('home')
+
+
+def orders(request, pk):
     if request.user.is_authenticated and request.user.is_superuser:
         # get orders
         order = Order.objects.get(id=pk)
@@ -259,7 +262,7 @@ def orders(request,pk):
                 order.update(shipped=False)
             messages.success(request, "Shipping Status Updated")
             return redirect('home')
-        return render(request, 'payments/orders.html', {'order': order, 'items':items})
+        return render(request, 'payments/orders.html', {'order': order, 'items': items})
     else:
         messages.success(request, "Access Denied")
-        return redirect(request, 'home')
+        return redirect('home')
