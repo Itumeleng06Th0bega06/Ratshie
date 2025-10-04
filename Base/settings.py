@@ -15,11 +15,11 @@ load_dotenv()
 DB_PASSWORD_IT = os.environ['DB_PASSWORD_IT']
 
 # LOCAL PASSWORD
-#DB_PASSWORD_ISL = os.environ.get('DB_PASSWORD_IT')
+DB_PASSWORD_IT = os.environ.get('DB_PASSWORD_IT')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
-#SECRET_KEY = os.environ.get('SECRET_KEY')
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -27,11 +27,13 @@ DEBUG = True
 
 
 #ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['ratshie.com',
-                 'localhost:8000',
-                 'ratshie-production.up.railway.app',
-                 '6e212864a6ca.ngrok-free.app',
-                ]
+ALLOWED_HOSTS = [
+    'ratshie.com',
+    'localhost',
+    '127.0.0.1',
+    'ratshie-production.up.railway.app',
+    '6e212864a6ca.ngrok-free.app',
+]
 CSRF_TRUSTED_ORIGINS = ['https://ratshie.com',
                         'http://localhost:8000',
                         'https://ratshie-production.up.railway.app',
@@ -64,7 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    
 
 ]
 
@@ -73,7 +75,7 @@ ROOT_URLCONF = 'Base.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],#BASE_DIR, 'templates/store'
+    'DIRS': [BASE_DIR / 'templates'],  # project-level templates directory
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -143,15 +145,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = ['static/']
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # whitenoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -159,5 +161,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # PayPal (django-paypal)
-PAYPAL_TEST = os.environ.get('PAYPAL_TEST') # default True for sandbox
+PAYPAL_TEST = os.environ.get('PAYPAL_TEST', 'True') == 'True'  # convert string -> bool
 PAYPAL_RECEIVER_EMAIL = os.environ.get('PAYPAL_RECEIVER_EMAIL')  # correct spelling
