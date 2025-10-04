@@ -40,7 +40,7 @@
       </div>
 
       </br></br>
-  {{ paypal_form.render }}
+        {{ paypal_form.render }}
       </br></br></br></br>
 
       <div class="col-md-6 checkout-form">
@@ -51,7 +51,46 @@
           {{ billing_form.as_p }}
           <button type="submit" class="btn btn-primary btn-block mt-4 py-3" class="submit-btn">Pay R{{ totals }}</button>
         </form>
+
         
+         <!-- PAYPAL BUTTONS HERE  -->
+
+                    <div id="paypal-button-container"></div>
+
+                    <!-- Include the PayPal JavaScript SDK -->
+                    <script
+                        src="https://www.paypal.com/sdk/js?client-id=AU4tSiGfa7uoXlk3dHrWzzFE0GfBbLe92CkhfiStkyGlojoysfh9NqQh7gzrgZ9jF_p4pp0Lyy3G_mSy&currency=USD">
+                    </script>
+
+                    <script>
+                        // Render the PayPal button into #paypal-button-container
+                        paypal.Buttons({
+
+                            // Set up the transaction
+                            createOrder: function (data, actions) {
+                                return actions.order.create({
+                                    purchase_units: [{
+                                        amount: {
+                                            value: {{ totals | floatformat:2 }}
+                                        }
+                                    }]
+                                });
+                            },
+
+                            // Finalize the transaction
+                            onApprove: function (data, actions) {
+                                return actions.order.capture().then(function (details) {
+                                    // Show a success message to the buyer
+                                    alert('Transaction completed by ' + details.payer.name
+                                        .given_name + '!');
+                                });
+                            }
+
+
+                        }).render('#paypal-button-container');
+                    </script>
+
+                </div>
       </div>
     </div>
   </div>

@@ -19,7 +19,7 @@ DB_PASSWORD_IT = os.environ['DB_PASSWORD_IT']
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['SECRET_KEY']
-#SECRET_KEYS = os.environ.get('SECRET_KEY')
+#SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -27,8 +27,14 @@ DEBUG = True
 
 
 #ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['https://ratshie.com','ratshie.com','localhost:8000','ratshie-production.up.railway.app','https://ratshie-production.up.railway.app']
-CSRF_TRUSTED_ORIGINS = ['https://ratshie.com','http://localhost:8000','https://ratshie-production.up.railway.app']
+ALLOWED_HOSTS = ['ratshie.com',
+                 'localhost:8000',
+                 'ratshie-production.up.railway.app',
+                ]
+CSRF_TRUSTED_ORIGINS = ['https://ratshie.com',
+                        'http://localhost:8000',
+                        'https://ratshie-production.up.railway.app',
+                        ]
 
 
 # Application definition

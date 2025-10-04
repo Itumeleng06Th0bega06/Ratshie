@@ -67,7 +67,7 @@ def billing_info(request):
             'item_name': 'Order',
             'no_shipping': '2',
             'invoice':str(uuid.uuid4()),
-            'currency': 'ZAR',
+            'currency': 'USD',
             'notify_url': 'https://{}{}'.format(host,reverse('paypal-ipn')),
             'return_url': 'https://{}{}'.format(host,reverse('payment_success')),
             'cancel_url': 'https://{}{}'.format(host,reverse('payment_failed')),
@@ -157,7 +157,7 @@ def process_order(request):
             curr_user = Profile.objects.filter(user__id=request.user.id)
             curr_user.update(old_cart="")
             
-            messages.warning(request, 'oder placed')
+            messages.success(request, 'Order placed')
             return redirect('home')
         else:
             create_order = Order(full_name=full_name,
@@ -191,7 +191,7 @@ def process_order(request):
                     # delete key
                     del request.session[key]
             
-            messages.warning(request, 'oder placed')
+            messages.success(request, 'Order placed')
             return redirect('home')
         
     else:
@@ -216,7 +216,7 @@ def shipped_dash(request):
 
         return render(request, 'payments/shipped_dash.html', {'orders': orders})
     else:
-        messages.success(request, "Access Denied")
+        messages.warning(request, "Access Denied")
         return redirect('home')
 
 
@@ -237,7 +237,7 @@ def not_shipped(request):
             return redirect('not_shipped')
         return render(request, 'payments/not_shipped.html', {'orders': orders})
     else:
-        messages.success(request, "Access Denied")
+        messages.warning(request, "Access Denied")
         return redirect('home')
 
 
@@ -264,5 +264,5 @@ def orders(request, pk):
             return redirect('home')
         return render(request, 'payments/orders.html', {'order': order, 'items': items})
     else:
-        messages.success(request, "Access Denied")
+        messages.warning(request, "Access Denied")
         return redirect('home')
