@@ -30,10 +30,12 @@ DEBUG = True
 ALLOWED_HOSTS = ['ratshie.com',
                  'localhost:8000',
                  'ratshie-production.up.railway.app',
+                 '6e212864a6ca.ngrok-free.app',
                 ]
 CSRF_TRUSTED_ORIGINS = ['https://ratshie.com',
                         'http://localhost:8000',
                         'https://ratshie-production.up.railway.app',
+                        'https://6e212864a6ca.ngrok-free.app',
                         ]
 
 
